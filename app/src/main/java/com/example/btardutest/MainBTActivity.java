@@ -13,6 +13,7 @@ import android.bluetooth.BluetoothAdapter.LeScanCallback;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothSocket;
@@ -62,6 +63,7 @@ public class MainBTActivity extends Activity {
 	private Button btnSend;
 	private Button btnRead;
 	private SeekBar scrlRed, scrlGreen, scrlBlue;
+    private boolean waitForWrite=false;
 
     BluetoothDevice mDevice;
 	
@@ -106,6 +108,12 @@ public class MainBTActivity extends Activity {
                 if(serialSerivice!=null) {
                     characteristicTX = serialSerivice.getCharacteristic(UUID_HM_RX_TX);
                     characteristicRX = serialSerivice.getCharacteristic(UUID_HM_RX_TX);
+
+                    mBluetoothGatt.setCharacteristicNotification(characteristicRX, true);
+                    BluetoothGattDescriptor  descriptor = characteristicRX.getDescriptor(
+                            UUID.fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
+                   descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                    mBluetoothGatt.writeDescriptor(descriptor);
                     Log.w(TAG, "Connection to serial service OK");
                 }else{
                     Log.w(TAG, "onServicesDiscovered Not an HM10");
@@ -146,6 +154,26 @@ public class MainBTActivity extends Activity {
             }else {
                 Log.w(TAG, "onCharacteristicRead received: " + status);
             }
+
+        }
+
+        @Override
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+            final byte[] data = characteristic.getValue();
+            if (data != null && data.length > 0) {
+                final StringBuilder stringBuilder = new StringBuilder(data.length);
+                for(byte byteChar : data)
+                    stringBuilder.append(String.format("%02X ", byteChar));
+                Log.d(TAG, String.format("Received Other: %s (%s)", stringBuilder, new String(data)));
+            }
+        }
+
+        @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            //super.onCharacteristicWrite(gatt, characteristic, status);
+            Log.d(TAG, String.format("Writed Other: %s (%d)", characteristic.getUuid().toString()  , status));
+            waitForWrite=false;
+            //mBluetoothGatt.executeReliableWrite();
         }
     };
 
@@ -218,8 +246,7 @@ public class MainBTActivity extends Activity {
 			@Override
 			public void onClick(View v) {
                 if(characteristicTX!=null){
-                    characteristicTX.setValue("Hi From Android".getBytes());
-                    mBluetoothGatt.writeCharacteristic(characteristicTX);
+                    sendMessage(ArduTrainCommandHelper.generateEchoMessage("Hi From Android"));
                 }
 			}
 		});
@@ -236,6 +263,57 @@ public class MainBTActivity extends Activity {
 		scrlGreen=(SeekBar)findViewById(R.id.scrlGreen);
 		scrlBlue=(SeekBar)findViewById(R.id.scrlBlue);
 	}
+
+
+    protected void sendMessage(byte[] in){
+        byte[] tmp = new byte[10]; //El modulo lo manda en chunks de 10,...
+        for(int i=0;i<in.length;i+=tmp.length){
+            int size = (in.length<(i+tmp.length))?in.length%tmp.length:tmp.length;
+            if(size<tmp.length){
+                tmp=new byte[size];
+            }
+            System.arraycopy(in,i,tmp,0,size);
+            waitForWrite=true;
+            characteristicTX.setValue(tmp);
+            mBluetoothGatt.writeCharacteristic(characteristicTX);
+            Log.d(TAG,"Send "+size+" bytes");
+            while(waitForWrite){
+                try {
+                    Thread.sleep(1); //dejamos un 1ms de espera, para que la JVM pueda hacer algo
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            Log.d(TAG,"Writed "+size+" bytes");
+        }
+
+
+
+        //mBluetoothGatt.abortReliableWrite();
+        /*waitForWrite=true;
+        characteristicTX.setValue(tmp);
+        mBluetoothGatt.writeCharacteristic(characteristicTX);
+        Log.d(TAG,"Send 10 bytes");
+        while(waitForWrite);
+        Log.d(TAG,"Writed 10 bytes");
+        tmp=new byte[10];
+        System.arraycopy(in,10,tmp,0,10);
+        characteristicTX.setValue(tmp);
+        waitForWrite=true;
+        mBluetoothGatt.writeCharacteristic(characteristicTX);
+        Log.d(TAG,"Send 10 bytes");
+        while(waitForWrite);
+        Log.d(TAG,"Writed 10 bytes");
+
+        tmp=new byte[5];
+        System.arraycopy(in,20,tmp,0,5);
+        characteristicTX.setValue(tmp);
+        waitForWrite=true;
+        mBluetoothGatt.writeCharacteristic(characteristicTX);
+        Log.d(TAG,"Send 5 bytes");
+        while(waitForWrite);
+        Log.d(TAG,"Writed 5 bytes");*/
+    }
 
 	@Override
 	protected void onDestroy() {
