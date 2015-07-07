@@ -16,6 +16,9 @@ public class ArduTrainCommandHelper {
         ret[1]=cmd.getCmd();
         System.arraycopy(payload,0,ret,2,payload.length);
         ret[payload.length+2]=generateCrc(ret, payload.length+2);
+        for(int i=payload.length+3;i<messageSize;i++){
+            ret[i]= (byte)payload.length;
+        }
         return ret;
     }
 
