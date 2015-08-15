@@ -32,9 +32,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 public class MainBTActivity extends Activity {
 	public static final String TAG = "BT_TEST";
@@ -62,8 +64,13 @@ public class MainBTActivity extends Activity {
 	final int RECIEVE_MESSAGE = 1;
 	private Button btnSend;
 	private Button btnRead;
-	private SeekBar scrlRed, scrlGreen, scrlBlue;
+	private SeekBar sbChA, sbChB;
+    private ProgressBar pbCurrent;
     private boolean waitForWrite=false;
+
+
+    private ToggleButton tbChABackward,tbChAStopL,tbChAFree,tbChAStopH,tbChAForward;
+    private ToggleButton tbChBBackward,tbChBStopL,tbChBFree,tbChBStopH,tbChBForward;
 
     BluetoothDevice mDevice;
 	
@@ -131,7 +138,7 @@ public class MainBTActivity extends Activity {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (UUID_HM10_SERIAL.equals(characteristic.getUuid())) {
                     int flag = characteristic.getProperties();
-                    int format = -1;
+                    int format;
                     if ((flag & 0x01) != 0) {
                         format = BluetoothGattCharacteristic.FORMAT_UINT16;
                         Log.d(TAG, "Heart rate format UINT16.");
@@ -208,19 +215,18 @@ public class MainBTActivity extends Activity {
 
 		btAdapter = BluetoothAdapter.getDefaultAdapter();
 
-		if (!btAdapter.isEnabled()) {
-			// Intent enableBtIntent = new
-			// Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-			// startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-		}
+		/*if (!btAdapter.isEnabled()) {
+			Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+			startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+		}*/
 
 		btnDiscover.setOnClickListener(new View.OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				btAdapter.startLeScan(leCallback);
-			}
-		});
+            @Override
+            public void onClick(View v) {
+                btAdapter.startLeScan(leCallback);
+            }
+        });
 
         btnConnect=(Button)findViewById(R.id.btnConnect);
         btnConnect.setOnClickListener(new View.OnClickListener() {
@@ -258,11 +264,59 @@ public class MainBTActivity extends Activity {
 			public void onClick(View v) {
 			}
 		});
-		
-		scrlRed=(SeekBar)findViewById(R.id.scrlRed);
-		scrlGreen=(SeekBar)findViewById(R.id.scrlGreen);
-		scrlBlue=(SeekBar)findViewById(R.id.scrlBlue);
+
+        sbChA=(SeekBar)findViewById(R.id.sbChA);
+        sbChB=(SeekBar)findViewById(R.id.sbChB);
+		pbCurrent=(ProgressBar)findViewById(R.id.pbCurrent);
+
+        tbChABackward = (ToggleButton)findViewById(R.id.btnChABackward);
+        tbChAStopL = (ToggleButton)findViewById(R.id.btnChAStopLow);
+        tbChAFree = (ToggleButton)findViewById(R.id.btnChAFree);
+        tbChAStopH = (ToggleButton)findViewById(R.id.btnChAStopHight);
+        tbChAForward = (ToggleButton)findViewById(R.id.btnChAFordward);
+
+        View.OnClickListener chAListener = new ButtonGroupClickListener(new ToggleButton[]{tbChABackward,tbChAStopL,tbChAFree,tbChAStopH,tbChAForward});
+        tbChABackward.setOnClickListener(chAListener);
+        tbChAStopL.setOnClickListener(chAListener);
+        tbChAFree.setOnClickListener(chAListener);
+        tbChAStopH.setOnClickListener(chAListener);
+        tbChAForward.setOnClickListener(chAListener);
+
+        tbChBBackward = (ToggleButton)findViewById(R.id.btnChBBackward);
+        tbChBStopL = (ToggleButton)findViewById(R.id.btnChBStopLow);
+        tbChBFree = (ToggleButton)findViewById(R.id.btnChBFree);
+        tbChBStopH = (ToggleButton)findViewById(R.id.btnChBStopHight);
+        tbChBForward = (ToggleButton)findViewById(R.id.btnChBFordward);
+
+        View.OnClickListener chBListener = new ButtonGroupClickListener(new ToggleButton[]{tbChBBackward,tbChBStopL,tbChBFree,tbChBStopH,tbChBForward});
+        tbChBBackward.setOnClickListener(chBListener);
+        tbChBStopL.setOnClickListener(chBListener);
+        tbChBFree.setOnClickListener(chBListener);
+        tbChBStopH.setOnClickListener(chBListener);
+        tbChBForward.setOnClickListener(chBListener);
+
 	}
+
+    private class ButtonGroupClickListener implements View.OnClickListener {
+        ToggleButton[] list;
+
+       public  ButtonGroupClickListener(ToggleButton[] list){
+           this.list=list;
+       }
+
+        @Override
+        public void onClick(View v) {
+            for(int i=0;i<list.length;i++){
+                ToggleButton btn =list[i];
+                if (btn.isChecked() && btn.getId()!=v.getId()){
+                    btn.setChecked(false);
+                }
+                if(btn.getId()!=v.getId()){
+                    Log.d(TAG,"index found: "+i);
+                }
+            }
+        }
+    }
 
 
     protected void sendMessage(byte[] in){

@@ -57,7 +57,7 @@
         android:text="Read" />
 
     <SeekBar
-        android:id="@+id/scrlRed"
+        android:id="@+id/sbChA"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -66,21 +66,126 @@
         android:max="255" />
 
     <SeekBar
-        android:id="@+id/scrlGreen"
+        android:id="@+id/sbChB"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/scrlRed"
-        android:layout_below="@+id/scrlRed"
+        android:max="255"
         android:layout_marginTop="18dp"
-        android:max="255" />
+        android:layout_below="@+id/rlChABtns"
+        android:layout_alignParentStart="true" />
 
-    <SeekBar
-        android:id="@+id/scrlBlue"
+    <ProgressBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/scrlGreen"
-        android:layout_below="@+id/scrlGreen"
+        android:id="@+id/pbCurrent"
+        android:layout_below="@+id/rlChBBtns"
+        android:layout_alignParentStart="true"
         android:layout_marginTop="18dp"
-        android:max="255" />
+        android:max="255"
+        android:indeterminate="false"
+        style="@android:style/Widget.ProgressBar.Horizontal"/>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/sbChA"
+        android:layout_alignParentStart="true"
+        android:id="@+id/rlChABtns">
+
+        <ToggleButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New ToggleButton"
+            android:id="@+id/btnChABackward"
+            android:layout_alignParentStart="true"
+            android:textOff="Backward"
+            android:textOn="Backward" />
+
+        <ToggleButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New ToggleButton"
+            android:id="@+id/btnChAStopLow"
+            android:layout_toEndOf="@+id/btnChABackward"
+            android:textOff="Stop L"
+            android:textOn="Stop L" />
+        <ToggleButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New ToggleButton"
+            android:id="@+id/btnChAFree"
+            android:layout_toEndOf="@+id/btnChAStopLow"
+            android:textOff="Free"
+            android:textOn="Free"
+            android:checked="true" />
+        <ToggleButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New ToggleButton"
+            android:id="@+id/btnChAStopHight"
+            android:layout_toEndOf="@+id/btnChAFree"
+            android:textOff="Stop H"
+            android:textOn="Stop H" />
+        <ToggleButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New ToggleButton"
+            android:id="@+id/btnChAFordward"
+            android:layout_toEndOf="@+id/btnChAStopHight"
+            android:textOff="Forward"
+            android:textOn="Forward" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/sbChB"
+        android:layout_alignParentStart="true"
+        android:id="@+id/rlChBBtns">
+
+        <ToggleButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New ToggleButton"
+            android:id="@+id/btnChBBackward"
+            android:layout_alignParentStart="true"
+            android:textOff="Backward"
+            android:textOn="Backward" />
+
+        <ToggleButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New ToggleButton"
+            android:id="@+id/btnChBStopLow"
+            android:layout_toEndOf="@+id/btnChBBackward"
+            android:textOff="Stop L"
+            android:textOn="Stop L" />
+        <ToggleButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New ToggleButton"
+            android:id="@+id/btnChBFree"
+            android:layout_toEndOf="@+id/btnChBStopLow"
+            android:textOff="Free"
+            android:textOn="Free"
+            android:checked="true" />
+        <ToggleButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New ToggleButton"
+            android:id="@+id/btnChBStopHight"
+            android:layout_toEndOf="@+id/btnChBFree"
+            android:textOff="Stop H"
+            android:textOn="Stop H" />
+        <ToggleButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New ToggleButton"
+            android:id="@+id/btnChBFordward"
+            android:layout_toEndOf="@+id/btnChBStopHight"
+            android:textOff="Forward"
+            android:textOn="Forward" />
+    </RelativeLayout>
+
 
 </RelativeLayout>
