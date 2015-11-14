@@ -72,6 +72,9 @@ public class MainBTActivity extends Activity {
     private ToggleButton tbChABackward,tbChAStopL,tbChAFree,tbChAStopH,tbChAForward;
     private ToggleButton tbChBBackward,tbChBStopL,tbChBFree,tbChBStopH,tbChBForward;
 
+    ButtonGroupClickListener chAListener;
+    ButtonGroupClickListener chBListener;
+
     BluetoothDevice mDevice;
 	
 	/*private Handler h= new Handler() {
@@ -275,7 +278,7 @@ public class MainBTActivity extends Activity {
         tbChAStopH = (ToggleButton)findViewById(R.id.btnChAStopHight);
         tbChAForward = (ToggleButton)findViewById(R.id.btnChAFordward);
 
-        View.OnClickListener chAListener = new ButtonGroupClickListener(new ToggleButton[]{tbChABackward,tbChAStopL,tbChAFree,tbChAStopH,tbChAForward});
+        chAListener = new ButtonGroupClickListener(new ToggleButton[]{tbChABackward,tbChAStopL,tbChAFree,tbChAStopH,tbChAForward},(byte)1);
         tbChABackward.setOnClickListener(chAListener);
         tbChAStopL.setOnClickListener(chAListener);
         tbChAFree.setOnClickListener(chAListener);
@@ -288,33 +291,72 @@ public class MainBTActivity extends Activity {
         tbChBStopH = (ToggleButton)findViewById(R.id.btnChBStopHight);
         tbChBForward = (ToggleButton)findViewById(R.id.btnChBFordward);
 
-        View.OnClickListener chBListener = new ButtonGroupClickListener(new ToggleButton[]{tbChBBackward,tbChBStopL,tbChBFree,tbChBStopH,tbChBForward});
+        chBListener= new ButtonGroupClickListener(new ToggleButton[]{tbChBBackward,tbChBStopL,tbChBFree,tbChBStopH,tbChBForward},(byte)2);
         tbChBBackward.setOnClickListener(chBListener);
         tbChBStopL.setOnClickListener(chBListener);
         tbChBFree.setOnClickListener(chBListener);
         tbChBStopH.setOnClickListener(chBListener);
         tbChBForward.setOnClickListener(chBListener);
 
+        sbChA.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Log.d(TAG,"Changed CHA: "+progress);
+
+                if(characteristicTX!=null){
+                    //sendMessage(ArduTrainCommandHelper.generateSetChannelMessage((byte)1, (byte)seekBar.getProgress(), chAListener.getDirection()));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                Log.d(TAG,"Stop CHA: "+seekBar.getProgress());
+                if(characteristicTX!=null){
+                    sendMessage(ArduTrainCommandHelper.generateSetChannelMessage((byte)1, (byte)seekBar.getProgress(), chAListener.getDirection()));
+                }
+            }
+        });
 	}
+
+    private static ArduTrainDireccion[] ArduTrainDireccionMap={ArduTrainDireccion.Backward,ArduTrainDireccion.StopL,
+            ArduTrainDireccion.Free,ArduTrainDireccion.StopH,ArduTrainDireccion.Forward};
 
     private class ButtonGroupClickListener implements View.OnClickListener {
         ToggleButton[] list;
+        byte ch;
+        ArduTrainDireccion dir;
 
-       public  ButtonGroupClickListener(ToggleButton[] list){
+
+       public  ButtonGroupClickListener(ToggleButton[] list, byte ch){
            this.list=list;
+           this.ch=ch;
        }
 
         @Override
         public void onClick(View v) {
-            for(int i=0;i<list.length;i++){
-                ToggleButton btn =list[i];
-                if (btn.isChecked() && btn.getId()!=v.getId()){
+            for(int i=0;i<list.length;i++) {
+                ToggleButton btn = list[i];
+                if (btn.isChecked() && btn.getId() != v.getId()) {
                     btn.setChecked(false);
                 }
-                if(btn.getId()!=v.getId()){
-                    Log.d(TAG,"index found: "+i);
+                if (btn.getId() == v.getId()) {
+                    Log.d(TAG, "index found: " + i);
+                    dir = ArduTrainDireccionMap[i];
+                    btn.setChecked(true);
                 }
             }
+        }
+
+        public ArduTrainDireccion getDirection(){
+            if(dir==null){
+                dir=ArduTrainDireccion.Free;
+            }
+            return dir;
         }
     }
 

@@ -7,7 +7,8 @@ public enum ArduTrainCommand {
     GenError((byte)0x00),
     Connect((byte)1),
     Disconnect((byte)2),
-    Echo((byte)3);
+    Echo((byte)3),
+    SetChannel((byte)4);
 
     public byte getCmd() {
         return cmd;

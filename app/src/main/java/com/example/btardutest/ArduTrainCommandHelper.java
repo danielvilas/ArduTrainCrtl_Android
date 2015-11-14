@@ -36,4 +36,13 @@ public class ArduTrainCommandHelper {
     public static byte[] generateEchoMessage(String echo){
         return generateRequest(ArduTrainCommand.Echo,echo.getBytes());
     }
+
+    public static byte[] generateSetChannelMessage(byte ch, byte val, ArduTrainDireccion dir){
+        byte[] payload= new byte[7];
+        payload[4]=ch;
+        payload[5]=dir.getValue();
+        payload[6]=val;
+        return  generateRequest(ArduTrainCommand.SetChannel,payload);
+    }
+
 }
